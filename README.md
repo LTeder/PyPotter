@@ -1,8 +1,8 @@
 # PyPotter
 
-PyPotter is a Python project allowing you to control your Home Assistant based smart home via a magic wand.
+This fork of PyPotter is a Python project allowing you to control Raspberry Pi GPIO via a magic wand.
 
-For now, more complete information can be found here: https://www.adamthole.com/category/smart-home/
+More complete information can be found here: https://www.adamthole.com/category/smart-home/
 
 # Acknowledgements
 PyPotter shares inspiration and code from the following projects:  
