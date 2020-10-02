@@ -19,18 +19,16 @@ import datetime
 import threading
 from threading import Thread
 from statistics import mean 
+from gpiozero import OutputDevice
 from CountsPerSec import CountsPerSec
-from HassApi import HassApi
 
 # Check for required number of arguments
-if (len(sys.argv) < 4):
-    print("Incorrect number of arguments. Required Arguments: [video source url] [home assistant URL] [API token]")
+if (len(sys.argv) < 2):
+    print("Required Argument: [video source url]")
     sys.exit(0)
 
-# Parse Required Arguments
+# Parse Required Argument
 videoSource = sys.argv[1]
-hassUrl = sys.argv[2]
-hassRestToken = sys.argv[3]
 
 # Parse Optional Arguments
 IsRemoveBackground = True
@@ -38,20 +36,20 @@ IsShowOutputWindows = True
 IsTraining = False
 IsDebugFps = False
 
+if (len(sys.argv) >= 3):
+    IsRemoveBackground = sys.argv[2] == "True"
+
+if (len(sys.argv) >= 4):
+    IsShowOutputWindows = sys.argv[3] == "True"
+
 if (len(sys.argv) >= 5):
-    IsRemoveBackground = sys.argv[4] == "True"
+    IsTraining = sys.argv[4] == "True"
 
 if (len(sys.argv) >= 6):
-    IsShowOutputWindows = sys.argv[5] == "True"
+    IsDebugFps = sys.argv[5] == "True"
 
-if (len(sys.argv) >= 7):
-    IsTraining = sys.argv[6] == "True"
-
-if (len(sys.argv) >= 8):
-    IsDebugFps = sys.argv[7] == "True"
-
-# Initialize Home Assistant Rest API Wrapper
-hass = HassApi(hassUrl, hassRestToken)
+# Initialize GPIO output
+outlet = OutputDevice(17)
 
 # Constants
 DesiredFps = 42
@@ -192,22 +190,25 @@ def ClassifyImage(img):
 
 def PerformSpell(spell):
     """
-    Make the desired Home Assistant REST API call based on the spell
+    Trigger events based on the spell performed 
+    """
+    outlet.toggle()
     """
     if (spell=="incendio"):
-        hass.TriggerAutomation("automation.wand_incendio")
+        print("incendio")
     elif (spell=="aguamenti"):
-        hass.TriggerAutomation("automation.wand_aguamenti")
+        print("aguamenti")
     elif (spell=="alohomora"):
-        hass.TriggerAutomation("automation.wand_alohomora")
+        print("alohomora")
     elif (spell=="silencio"):
-        hass.TriggerAutomation("automation.wand_silencio")
+        print("silencio")
     elif (spell=="specialis_revelio"):
-        hass.TriggerAutomation("automation.wand_specialis_revelio")
+        print("specialis revelio")
     elif (spell=="revelio"):
-        hass.TriggerAutomation("automation.wand_revelio")
+        print("revelio")
     elif (spell == "tarantallegra"):
-        hass.TriggerAutomation("automation.wand_tarantallegra")
+        print("tarantallegra")
+    """
 
 def CheckForPattern(wandTracks, exampleFrame):
     """
