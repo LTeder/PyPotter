@@ -8,12 +8,9 @@
 
 import sys
 import cv2
-from cv2 import *
 import numpy as np
 import math
-import os
-from os import listdir
-from os.path import isfile, join, isdir
+from os import listdir, path
 import time
 import datetime
 import threading
@@ -52,7 +49,7 @@ if (len(sys.argv) >= 6):
 outlet = OutputDevice(17)
 
 # Constants
-DesiredFps = 42
+DesiredFps = 20
 DefaultFps = 42 # Original constants trained for 42 FPS
 MicroSecondsBetweenFrames = (1 / DesiredFps) * 1000000
 
@@ -130,20 +127,20 @@ def InitClassificationAlgo() :
     trainingSet = []
     numPics = 0
     dirCount = 0
-    scriptpath = os.path.realpath(__file__)
-    trainingDirectory = join(os.path.dirname(scriptpath), TrainingFolderName)
+    scriptpath = path.realpath(__file__)
+    trainingDirectory = path.join(path.dirname(scriptpath), TrainingFolderName)
 
     # Every folder in the training directory contains a set of images corresponding to a single spell.
     # Loop through all folders to train all spells.
     for d in listdir(trainingDirectory):
-        if isdir(join(trainingDirectory, d)):
+        if path.isdir(path.join(trainingDirectory, d)):
             nameLookup[dirCount] = d
             dirCount = dirCount + 1
-            for f in listdir(join(trainingDirectory,d)):
-                if isfile(join(trainingDirectory,d,f)):
+            for f in listdir(path.join(trainingDirectory,d)):
+                if path.isfile(path.join(trainingDirectory,d,f)):
                     labelNames.append(d)
                     labelIndexes.append(dirCount-1)
-                    trainingSet.append(join(trainingDirectory,d,f));
+                    trainingSet.append(path.join(trainingDirectory,d,f));
                     numPics = numPics + 1
 
     print ("Trained Spells: ")
