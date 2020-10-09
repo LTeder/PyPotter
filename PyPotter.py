@@ -58,34 +58,17 @@ MinSpellLength = 15 * (DesiredFps / DefaultFps)
 MinSpellDistance = 100
 NumDistancesToAverage = int(round( 20 * (DesiredFps / DefaultFps)))
 
-# Booleans to turn on or off output windows
-IsShowOriginal = False
-IsShowBackgroundRemoved = False
-IsShowThreshold = False
-IsShowOutput = False
-
-if IsShowOutputWindows:
-    IsShowOriginal = True
-    IsShowBackgroundRemoved = True
-    IsShowThreshold = True
-    IsShowOutput = True
-
 # Create Windows
-if (IsShowOriginal):
+if (IsShowOutputWindows):
     cv2.namedWindow("Original")
     cv2.moveWindow("Original", 0, 0)
-
-if (IsShowBackgroundRemoved):
-    cv2.namedWindow("BackgroundRemoved")
-    cv2.moveWindow("BackgroundRemoved", 640, 0)
-
-if (IsShowThreshold):
     cv2.namedWindow("Threshold")
     cv2.moveWindow("Threshold", 0, 480+30)
-
-if (IsShowOutput):
     cv2.namedWindow("Output")
     cv2.moveWindow("Output", 640, 480+30)
+    if (IsRemoveBackground):
+        cv2.namedWindow("BackgroundRemoved")
+        cv2.moveWindow("BackgroundRemoved", 640, 0)
 
 # Init Global Variables
 IsNewFrame = False
@@ -258,7 +241,7 @@ def CheckForPattern(wandTracks, exampleFrame):
         wandTracks.clear()
 
     if wand_path_frame is not None:
-        if (IsShowOutput):
+        if (IsShowOutputWindows):
             wandPathFrameWithText = AddIterationsPerSecText(wand_path_frame, outputCps.countsPerSec())
             cv2.putText(wandPathFrameWithText, "Last Spell: " + LastSpell, (10, 400), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
             cv2.imshow("Output", wandPathFrameWithText)
@@ -311,7 +294,7 @@ def CalculateThreshold():
             ret, frameThresh = cv2.threshold(frame_gray, thresholdValue, 255, cv2.THRESH_BINARY);
 
             IsNewFrameThreshold = True
-            if (IsShowThreshold):
+            if (IsShowOutputWindows): # Originally IsShowThreshold
                     frameThreshWithCounts = AddIterationsPerSecText(frameThresh.copy(), thresholdCps.countsPerSec())
                     cv2.imshow("Threshold", frameThreshWithCounts)
         else:
@@ -436,7 +419,7 @@ while True:
                     
 
         # Update Windows
-        if (IsShowOriginal):
+        if (IsShowOutputWindows): # Originally IsShowOriginal
             frameWithCounts = AddIterationsPerSecText(frame.copy(), originalCps.countsPerSec())
             cv2.imshow("Original", frameWithCounts)
         
