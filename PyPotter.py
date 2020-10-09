@@ -6,17 +6,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import sys
 import cv2
-import numpy as np
-import math
-from os import listdir, path
-import time
 import datetime
-import threading
-from threading import Thread
-from statistics import mean 
 from gpiozero import OutputDevice
+import math
+import numpy as np
+from os import listdir, path
+from statistics import mean 
+import sys
+import time
+from threading import currentThread, Thread
+
 from CountsPerSec import CountsPerSec
 
 # Check for required number of arguments
@@ -275,7 +275,7 @@ def RemoveBackground():
     global frame, frame_no_background, IsNewFrame, IsNewFrameNoBackground
 
     fgbg = cv2.createBackgroundSubtractorMOG2()
-    t = threading.currentThread()
+    t = currentThread()
     while getattr(t, "do_run", True):
         if (IsNewFrame):
             IsNewFrame = False
@@ -299,7 +299,7 @@ def CalculateThreshold():
     """
     global frame, frame_no_background, frameThresh, IsNewFrame, IsNewFrameNoBackground, IsNewFrameThreshold
 
-    t = threading.currentThread()
+    t = currentThread()
     thresholdValue = 240
     while getattr(t, "do_run", True):
         if (IsRemoveBackground and IsNewFrameNoBackground) or (not IsRemoveBackground and IsNewFrame):
@@ -328,7 +328,7 @@ def ProcessData():
 
     oldFrameThresh = None
     trackedPoints = None
-    t = threading.currentThread()
+    t = currentThread()
 
     while getattr(t, "do_run", True):
         if (IsNewFrameThreshold):
