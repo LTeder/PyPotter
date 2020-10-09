@@ -82,7 +82,8 @@ outputCps = CountsPerSec()
 
 lk_params = dict( winSize  = (25,25),
                   maxLevel = 7,
-                  criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+                  criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT,
+                              10, 0.03))
 
 IsNewFrame = False
 frame = None
@@ -110,7 +111,8 @@ def InitClassificationAlgo() :
     scriptpath = path.realpath(__file__)
     trainingDirectory = path.join(path.dirname(scriptpath), TrainingFolderName)
 
-    # Every folder in the training directory contains a set of images corresponding to a single spell.
+    # Every folder in the training directory contains
+    # a set of images corresponding to a single spell.
     # Loop through all folders to train all spells.
     for d in listdir(trainingDirectory):
         if path.isdir(path.join(trainingDirectory, d)):
@@ -140,7 +142,8 @@ def InitClassificationAlgo() :
 
 def ClassifyImage(img):
     """
-    Classify input image based on previously trained k-Nearest Neighbor Algorithm
+    Classify input image based on previously trained
+    k-Nearest Neighbor Algorithm
     """
     global knn, nameLookup, args
 
@@ -189,7 +192,8 @@ def PerformSpell(spell):
 
 def CheckForPattern(wandTracks, exampleFrame):
     """
-    Check the given wandTracks to see if is is complete, and if it matches a trained spell
+    Check the given wandTracks to see if it
+    is complete, and if it matches a trained spell
     """
     global find_new_wands, LastSpell
 
@@ -220,19 +224,26 @@ def CheckForPattern(wandTracks, exampleFrame):
     avgMostRecentDistances = mean(mostRecentDistances)
     sumDistances = sum(distances)
 
-    _, contours, hierarchy = cv2.findContours(wand_path_frame,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, hierarchy = cv2.findContours(wand_path_frame,
+            cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Determine if wand stopped moving by looking at recent movement (avgMostRecentDistances), and check the length of distances to make sure the spell is reasonably long
-    if (avgMostRecentDistances < SpellEndMovement and len(distances) > MinSpellLength):
+    # Determine if wand stopped moving by looking at recent movement
+    # (avgMostRecentDistances), and check the length of distances
+    # to make sure the spell is reasonably long
+    if (avgMostRecentDistances < SpellEndMovement and
+            len(distances) > MinSpellLength):
         # Make sure wand path is valid and is over the defined minimum distance
         if (len(contours) > 0) and sumDistances > MinSpellDistance:
             cnt = contours[0]
             x,y,w,h = cv2.boundingRect(cnt)
             crop = wand_path_frame[y-10:y+h+10,x-30:x+w+30]
             result = ClassifyImage(crop);
-            cv2.putText(wand_path_frame, result, (0,50), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255,255,255))
+            cv2.putText(wand_path_frame, result, (0,50),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255,255,255))
 
-            print("Result: ", result, " Most Recent avg: ", avgMostRecentDistances, " Length Distances: ", len(distances), " Sum Distances: ", sumDistances)
+            print("Result: ", result, " Most Recent avg: ",
+                    avgMostRecentDistances, " Length Distances: ",
+                    len(distances), " Sum Distances: ", sumDistances)
             print("")
 
             PerformSpell(result)
@@ -242,8 +253,10 @@ def CheckForPattern(wandTracks, exampleFrame):
 
     if wand_path_frame is not None:
         if (IsShowOutputWindows):
-            wandPathFrameWithText = AddIterationsPerSecText(wand_path_frame, outputCps.countsPerSec())
-            cv2.putText(wandPathFrameWithText, "Last Spell: " + LastSpell, (10, 400), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
+            wandPathFrameWithText = AddIterationsPerSecText(wand_path_frame,
+                    outputCps.countsPerSec())
+            cv2.putText(wandPathFrameWithText, "Last Spell: " + LastSpell,
+                    (10, 400), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
             cv2.imshow("Output", wandPathFrameWithText)
 
     return wandTracks
@@ -264,12 +277,16 @@ def RemoveBackground():
 
             # Subtract Background
             fgmask = fgbg.apply(frameCopy, learningRate=0.001)
-            frame_no_background = cv2.bitwise_and(frameCopy, frameCopy, mask = fgmask)
+            frame_no_background = cv2.bitwise_and(frameCopy, frameCopy,
+                    mask = fgmask)
             IsNewFrameNoBackground = True
 
             if (IsShowBackgroundRemoved):
-                    frameNoBackgroundWithCounts = AddIterationsPerSecText(frame_no_background.copy(), noBackgroundCps.countsPerSec())
-                    cv2.imshow("BackgroundRemoved", frameNoBackgroundWithCounts)
+                    frameNoBackgroundWithCounts = AddIterationsPerSecText(
+                            frame_no_background.copy(),
+                            noBackgroundCps.countsPerSec())
+                    cv2.imshow("BackgroundRemoved",
+                            frameNoBackgroundWithCounts)
         else:
             time.sleep(0.001)
 
@@ -277,25 +294,30 @@ def CalculateThreshold():
     """
     Thread for calculating frame threshold
     """
-    global frame, frame_no_background, frameThresh, IsNewFrame, IsNewFrameNoBackground, IsNewFrameThreshold
+    global frame, frame_no_background, frameThresh, IsNewFrame, \
+        IsNewFrameNoBackground, IsNewFrameThreshold
 
     t = currentThread()
     thresholdValue = 240
     while getattr(t, "do_run", True):
-        if (IsRemoveBackground and IsNewFrameNoBackground) or (not IsRemoveBackground and IsNewFrame):
+        if (IsRemoveBackground and IsNewFrameNoBackground) or \
+                (not IsRemoveBackground and IsNewFrame):
             if IsRemoveBackground:
                 IsNewFrameNoBackground = False
-                frame_gray = cv2.cvtColor(frame_no_background, cv2.COLOR_BGR2GRAY)
+                frame_gray = cv2.cvtColor(frame_no_background,
+                        cv2.COLOR_BGR2GRAY)
 
             if not IsRemoveBackground:
                 IsNewFrame = False
                 frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            ret, frameThresh = cv2.threshold(frame_gray, thresholdValue, 255, cv2.THRESH_BINARY);
+            ret, frameThresh = cv2.threshold(frame_gray,
+                    thresholdValue, 255, cv2.THRESH_BINARY);
 
             IsNewFrameThreshold = True
             if (IsShowOutputWindows): # Originally IsShowThreshold
-                    frameThreshWithCounts = AddIterationsPerSecText(frameThresh.copy(), thresholdCps.countsPerSec())
+                    frameThreshWithCounts = AddIterationsPerSecText(
+                            frameThresh.copy(), thresholdCps.countsPerSec())
                     cv2.imshow("Threshold", frameThreshWithCounts)
         else:
             time.sleep(0.001)
@@ -304,7 +326,8 @@ def ProcessData():
     """
     Thread for processing final frame
     """
-    global frameThresh, IsNewFrameThreshold, findNewWands, wandTracks, outputFrameCount
+    global frameThresh, IsNewFrameThreshold, findNewWands, \
+            wandTracks, outputFrameCount
 
     oldFrameThresh = None
     trackedPoints = None
@@ -320,12 +343,15 @@ def ProcessData():
 
             if (findNewWands):
                 # Identify Potential Wand Tips using GoodFeaturesToTrack
-                trackedPoints = cv2.goodFeaturesToTrack(localFrameThresh, 5, .01, 30)
+                trackedPoints = cv2.goodFeaturesToTrack(
+                        localFrameThresh, 5, .01, 30)
                 if trackedPoints is not None:
                     findNewWands = False
             else:
                 # calculate optical flow
-                nextPoints, statusArray, err = cv2.calcOpticalFlowPyrLK(oldFrameThresh, localFrameThresh, trackedPoints, None, **lk_params)
+                nextPoints, statusArray, err = cv2.calcOpticalFlowPyrLK(
+                        oldFrameThresh, localFrameThresh,
+                        trackedPoints, None, **lk_params)
            
                 # Select good points
                 good_new = nextPoints[statusArray==1]
@@ -345,8 +371,8 @@ def ProcessData():
                     wandTracks = CheckForPattern(wandTracks, localFrameThresh)
            
                 else:
-                    # No Points were tracked, check for a pattern and start searching for wands again
-                    #wandTracks = CheckForPattern(wandTracks, localFrameThresh)
+                    # No Points were tracked, check for a pattern
+                    # and start searching for wands again
                     wandTracks = []
                     findNewWands = True
             
@@ -403,8 +429,10 @@ while True:
     if (ret):
         frame = localFrame.copy()
 
-        # If successful, flip the frame and set the Flag for the next process to take over
-        cv2.flip(frame, 1, frame) # Flipping the frame is done so the spells look like what we expect, instead of the mirror image
+        # If successful, flip the frame and set the Flag for
+        # the next process to take over
+        cv2.flip(frame, 1, frame) # Flipping the frame is done so the
+        # spells look like what we expect, instead of the mirror image
         IsNewFrame = True
 
         if (IsDebugFps):
@@ -420,7 +448,8 @@ while True:
 
         # Update Windows
         if (IsShowOutputWindows): # Originally IsShowOriginal
-            frameWithCounts = AddIterationsPerSecText(frame.copy(), originalCps.countsPerSec())
+            frameWithCounts = AddIterationsPerSecText(
+                    frame.copy(), originalCps.countsPerSec())
             cv2.imshow("Original", frameWithCounts)
         
     elif not ret:
