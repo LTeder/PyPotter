@@ -6,6 +6,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import argparse
 import cv2
 import datetime
 from gpiozero import OutputDevice
@@ -19,31 +20,27 @@ from threading import currentThread, Thread
 
 from CountsPerSec import CountsPerSec
 
-# Check for required number of arguments
-if (len(sys.argv) < 2):
-    print("Required Argument: [video source url]")
-    sys.exit(0)
+# Arguments
+parser = argparse.ArgumentParser(description =
+        "Differentiate drawn spells from an M-JPEG video stream "
+        "to toggle RPi GPIO pins")
+parser.add_argument("stream", help = "URL for the M-JPEG video stream "
+        "(likely format: http://[ip]:8080/?action=stream)")
+parser.add_argument("-b", "--bgremoval", action = "store_true",
+        help = "Enables background removal (significantly increases CPU load)")
+parser.add_argument("-w", "--windows", action = "store_true",
+        help = "Enables output windows")
+parser.add_argument("-t", "--training", action = "store_true",
+        help = "Enables training mode")
+parser.add_argument("-f", "--fpsdebug", action = "store_true",
+        help = "Enables FPS print statements every second for debugging")
+args = parser.parse_args()
 
-# Parse Required Argument
-videoSource = sys.argv[1]
-
-# Parse Optional Arguments
-IsRemoveBackground = True
-IsShowOutputWindows = True
-IsTraining = False
-IsDebugFps = False
-
-if (len(sys.argv) >= 3):
-    IsRemoveBackground = sys.argv[2] == "True"
-
-if (len(sys.argv) >= 4):
-    IsShowOutputWindows = sys.argv[3] == "True"
-
-if (len(sys.argv) >= 5):
-    IsTraining = sys.argv[4] == "True"
-
-if (len(sys.argv) >= 6):
-    IsDebugFps = sys.argv[5] == "True"
+videoSource = args.stream
+IsRemoveBackground = args.bgremoval
+IsShowOutputWindows = args.windows
+IsTraining = args.training
+IsDebugFps = args.fpsdebug
 
 # Initialize GPIO output
 outlet = OutputDevice(17)
